@@ -102,7 +102,7 @@ ALTER TABLE `merch`
 
 ALTER TABLE `order`
   ADD CONSTRAINT `fk_order_store` FOREIGN KEY (`store_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_qrcode_id` FOREIGN KEY (`QRCODE_ID`) REFERENCES `qrcode` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_qrcode_id` FOREIGN KEY (`table_id`) REFERENCES `qrcode` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `orderitem`
   ADD CONSTRAINT `fk_orderitem_merch` FOREIGN KEY (`order_item`) REFERENCES `merch` (`id`) ON DELETE CASCADE,
