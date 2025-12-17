@@ -1,8 +1,8 @@
 # Laravel 프로젝트: 온라인 강의실 시스템
 
 **작성자**: 전민기 
-**프로젝트 종류**: 팀 프로젝트
-**사용된 기술**: Laravel, Blade template
+**프로젝트 종류**: 개인 프로젝트
+**사용된 기술**: Laravel, Blade template, Tailwind CSS
 
 ## 간단 설명
 
