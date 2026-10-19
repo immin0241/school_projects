@@ -20,9 +20,10 @@ class LectureRoomFactory extends Factory
     public function definition(): array
     {
         return [
-            'professor_id' => 1,
-            'title',
+            'professor_id' => \App\Models\User::factory()->professor(),
+            'title' => fake()->sentence(3),
             'description' => fake()->realText(200),
+            'thumbnail' => 'lecture_thumbnails/sample.png',
         ];
     }
 

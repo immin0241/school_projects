@@ -27,7 +27,7 @@ class ProfessorController extends Controller
     }
 
     public function profile($id) {
-        $prof = User::find($id);
+        $prof = User::findOrFail($id);
         $data = LectureRoom::where(['professor_id' => $prof->id])->get();
 
         $sub_count = $prof->lectureRooms()->withCount('subscriptions')->get()->sum('subscriptions_count');

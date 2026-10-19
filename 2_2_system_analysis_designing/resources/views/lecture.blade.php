@@ -19,9 +19,16 @@
                         <a href="{{route('professor.edit_lecture_view', $lecture->id)}}" class="px-4 py-3 rounded-lg border border-primary flex items-center justify-center flex-1">관리하기</a>
                     @else
                         @if($is_subscripted ?? false)
-                            <a href="{{route('unsubscribe', $lecture->id)}}" class="px-4 py-3 rounded-lg bg-primary flex items-center justify-center flex-1">구독 취소하기</a>
+                            <form action="{{route('unsubscribe', $lecture->id)}}" method="POST" class="flex flex-1">
+                                @csrf
+                                @method('DELETE')
+                                <button class="px-4 py-3 rounded-lg bg-primary flex items-center justify-center flex-1">구독 취소하기</button>
+                            </form>
                         @else
-                            <a href="{{route('subscribe', $lecture->id)}}" class="px-4 py-3 rounded-lg bg-primary flex items-center justify-center flex-1">구독하기</a>
+                            <form action="{{route('subscribe', $lecture->id)}}" method="POST" class="flex flex-1">
+                                @csrf
+                                <button class="px-4 py-3 rounded-lg bg-primary flex items-center justify-center flex-1">구독하기</button>
+                            </form>
                         @endif
                     @endif
 

@@ -5,37 +5,48 @@ namespace App\Http\Controllers;
 use App\Models\Lecture;
 use App\Models\LectureRoom;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class LectureController extends Controller
 {
-    public function upload_lecture_view(Request $request, $id) {
-        return view('upload_lecture', ["idx" => $id]);
+    public function upload_lecture_view($id)
+    {
+        Gate::authorize('manage', LectureRoom::findOrFail($id));
+
+        return view('upload_lecture', ['idx' => $id]);
     }
 
-    function upload_lecture(Request $request) {
-        $request->validate([
-            'title' => 'required',
-            'video' => 'required|file|mimes:mp4'
+    public function upload_lecture(Request $request)
+    {
+        $validated = $request->validate([
+            'lecture_room_id' => 'required|integer|exists:lecture_rooms,id',
+            'title' => 'required|string|max:255',
+            'video' => 'required|file|mimes:mp4',
         ]);
 
-        $path = $request->file('video')->store('videos', 'public');
+        // 폼의 hidden 값은 사용자가 바꿀 수 있으므로, 그 강의실의 주인인지 서버에서 다시 확인한다.
+        $room = LectureRoom::findOrFail($validated['lecture_room_id']);
+        Gate::authorize('manage', $room);
 
         Lecture::create([
-            ...$request->only(['title', 'lecture_room_id']),
-            'video_url' => $path
+            'lecture_room_id' => $room->id,
+            'title' => $validated['title'],
+            // 영상은 비공개 디스크에 저장하고, 시청은 아래 view()를 거쳐서만 가능하다.
+            'video_url' => $request->file('video')->store('videos', 'local'),
         ]);
 
-        return redirect()->route('lecture_main', ["id" => $request->lecture_room_id])->with('message', '강의를 업로드했습니다.');
+        return redirect()->route('lecture_main', ['id' => $room->id])->with('message', '강의를 업로드했습니다.');
     }
 
-    public function view(Request $request, $id) {
-        $filename = Lecture::findOrFail($id);
-        $lectureroom = LectureRoom::findOrFail($filename->lecture_room_id)->subscriptions->where('student_id', Auth::id())->first();
+    public function view($id)
+    {
+        $lecture = Lecture::findOrFail($id);
+        Gate::authorize('watch', $lecture->lectureRoom);
 
-        if($filename->lectureRoom->professor_id !== Auth::id() && is_null($lectureroom)) {
-            return back()->with("message", "구독자만 강의를 볼 수 있습니다.");
-        }
-        return response()->file(storage_path('app/public/'.$filename->video_url));
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($lecture->video_url), 404);
+
+        return response()->file($disk->path($lecture->video_url));
     }
 }

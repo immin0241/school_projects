@@ -30,10 +30,12 @@ return [
 
     'disks' => [
 
+        // 비공개 저장소: 강의 영상처럼 권한 확인 후에만 내려줘야 하는 파일.
+        // public 디스크와 같은 경로를 쓰면 /storage/... 주소로 누구나 열 수 있다.
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'serve' => true,
+            'root' => storage_path('app/private'),
+            'serve' => false,
             'throw' => false,
         ],
 

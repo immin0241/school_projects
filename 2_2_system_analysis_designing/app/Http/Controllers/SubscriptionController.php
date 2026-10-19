@@ -2,43 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LectureRoom;
 use App\Models\Subscription;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends Controller
 {
-    public function subscribe(Request $request, $lectureRoomId)
+    public function subscribe($lectureRoomId)
     {
-        $user = Auth::user();
+        $room = LectureRoom::findOrFail($lectureRoomId);
 
-        // Check if the user is already subscribed
-        if (Subscription::where('student_id', $user->id)->where('lecture_room_id', $lectureRoomId)->exists()) {
-            return redirect()->back()->with('message', '이미 구독자입니다.');
-        }
+        $subscription = Subscription::firstOrCreate(
+            ['student_id' => Auth::id(), 'lecture_room_id' => $room->id],
+            ['subscribed_at' => now()],
+        );
 
-        // Create the subscription
-        Subscription::create([
-            'student_id' => $user->id,
-            'lecture_room_id' => $lectureRoomId,
-            'subscribed_at' => now(),
-        ]);
+        $message = $subscription->wasRecentlyCreated ? '구독하였습니다.' : '이미 구독자입니다.';
 
-        return redirect()->back()->with('message', '구독하였습니다.');
+        return redirect()->back()->with('message', $message);
     }
-    public function unsubscribe(Request $request, $lectureRoomId)
+
+    public function unsubscribe($lectureRoomId)
     {
-        $user = Auth::user();
+        $deleted = Subscription::where('student_id', Auth::id())
+            ->where('lecture_room_id', $lectureRoomId)
+            ->delete();
 
-        // Find the subscription
-        $subscription = Subscription::where('student_id', $user->id)->where('lecture_room_id', $lectureRoomId)->first();
-
-        if (!$subscription) {
+        if ($deleted === 0) {
             return redirect()->back()->with('error', '구독자가 아닙니다.');
         }
-
-        // Delete the subscription
-        $subscription->delete();
 
         return redirect()->back()->with('message', '구독을 취소하였습니다.');
     }

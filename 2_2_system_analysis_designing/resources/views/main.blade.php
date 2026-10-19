@@ -2,17 +2,24 @@
     <div class="py-6 flex items-center justify-center">
         <div class="max-w-screen-xl w-full flex justify-between">
             <div class="py-6 w-[640px]">
+                @php
+                    $top = $hot_lectures->first();
+                @endphp
                 <div>
                     <p class="p-1 text-white rounded-lg bg-primary inline-block pr-3">🌟 인기 강좌</p>
-                    <h1 id="title"
-                        class="text-5xl font-bold break-keep pt-5 line-clamp-2">{{$hot_lectures->get(0)->title}}</h1>
-                    <p id="description"
-                       class="pt-8 w-[500px] text-gray-500 line-clamp-3">{{$hot_lectures->get(0)->description}}</p>
-                    <a href="/lecture/{{$hot_lectures->get(0)->id}}"
-                       class="rounded-lg text-white mt-10 rounded-lg bg-primary px-5 py-3 inline-flex" id="lecture_link">
-                        <span>더 보기</span>
-                        <img src="/arrow.png" alt="arrow" class="ml-4 object-contain">
-                    </a>
+                    @if($top)
+                        <h1 id="title"
+                            class="text-5xl font-bold break-keep pt-5 line-clamp-2">{{$top->title}}</h1>
+                        <p id="description"
+                           class="pt-8 w-[500px] text-gray-500 line-clamp-3">{{$top->description}}</p>
+                        <a href="/lecture/{{$top->id}}"
+                           class="rounded-lg text-white mt-10 rounded-lg bg-primary px-5 py-3 inline-flex" id="lecture_link">
+                            <span>더 보기</span>
+                            <img src="/arrow.png" alt="arrow" class="ml-4 object-contain">
+                        </a>
+                    @else
+                        <h1 id="title" class="text-5xl font-bold break-keep pt-5">아직 개설된 강의가 없어요</h1>
+                    @endif
                 </div>
             </div>
 
@@ -66,15 +73,15 @@
 </x-app>
 
 <script>
-    const hot_items = [
-        @foreach($hot_lectures as $lecture)
-        {
-            title: `{{$lecture->title}}`,
-            description: `{!! $lecture->description !!}`,
-            url: `/lecture/{{$lecture->id}}`
-        },
-        @endforeach
-    ]
+    @php
+        $hot_items = $hot_lectures->map(fn ($lecture) => [
+            'title' => $lecture->title,
+            'description' => $lecture->description,
+            'url' => '/lecture/'.$lecture->id,
+        ])->values();
+    @endphp
+    // 사용자 입력(제목·설명)을 스크립트 안에 그대로 넣지 않고 JSON으로 인코딩해 전달한다.
+    const hot_items = {{ Js::from($hot_items) }}
 
     const swiper = new Swiper('.swiper', {
         direction: 'horizontal',

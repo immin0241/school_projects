@@ -27,11 +27,21 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => $this->faker->unique()->userName,
+            'userid' => strtolower($this->faker->unique()->userName),
             'password' => Hash::make('password'),
             'name' => $this->faker->name,
             'type' => '01',
         ];
+    }
+
+    public function student(): static
+    {
+        return $this->state(fn () => ['type' => '01']);
+    }
+
+    public function professor(): static
+    {
+        return $this->state(fn () => ['type' => '02']);
     }
 
     /**
